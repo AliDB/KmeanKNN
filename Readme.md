@@ -1,6 +1,5 @@
 
 # k-means and k-NN
-================
 In this tutorial I will explain how to use Kmeans and KNN withing an application. This tutorial was part of my course project for Data Science course with Prof. Harner. 
 
 This is well known dataset found in the pattern recognition literature. Fisher's paper is a classic in the field and is referenced frequently to this day. The data set contains 3 classes of 50 instances each, where each class refers to the type of iris plant.
@@ -14,7 +13,7 @@ Attribute Information:
 \* petal width in cm
 \* Iris species: Setosa; Versicolour; Virginica
 
-1 Compute summary statistics and plot a scatterplot matrix for each of the three iris species. `Species` is a factor and the other variables are numberic.
+#### 1 Compute summary statistics and plot a scatterplot matrix for each of the three iris species. `Species` is a factor and the other variables are numberic.
 
 ``` r
 data(iris)
@@ -63,7 +62,7 @@ pairs(irisVirginica [1:4], main = "Iris virginica", pch = 21, bg = c("blue"),pan
 
 ![](KmeansAndKNN_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-1-4.png)
 
-## 2 Create a logical variable `train` and add this to the `iris` data frame. Randomly sample 35 observations from each of the species and label these `TRUE`. Label the remaining 15 in each group (species) `FALSE`. The training and test observations should remain fixed for the remainder of the analysis. For convenience subset the sample into training and testing data frames.
+#### 2 Create a logical variable `train` and add this to the `iris` data frame. Randomly sample 35 observations from each of the species and label these `TRUE`. Label the remaining 15 in each group (species) `FALSE`. The training and test observations should remain fixed for the remainder of the analysis. For convenience subset the sample into training and testing data frames.
 
 ``` r
 # Put your R code here.
@@ -99,7 +98,7 @@ testa <- rbind(test11,test22,test33)
 true.labelsa <- testa$Species
 ```
 
-## 3 Perform an average linkage hierarchical cluster analysis on the training data frame without consideration of the species groupings and cut the tree at 3 groups. Provide relevant graphical and numerical summeries.
+#### 3 Perform an average linkage hierarchical cluster analysis on the training data frame without consideration of the species groupings and cut the tree at 3 groups. Provide relevant graphical and numerical summeries.
 
 ``` r
 traind <- traina
@@ -142,7 +141,7 @@ initial.pointsa
     ## [2,]   -1.5428257  -1.6734422   -1.3708956  -1.1701952
     ## [3,]    0.4908488  -0.4299358    0.6414404   0.6184259
 
-## 4 Cluster the training data using the *k*-means algorithm for *k* = 3 groups using the hierarchical cluster results above for the seed points. Provide PCA summaries of the results. Discuss the agreement between the true groups and the groups found by the *k*-means algorithm.
+#### 4 Cluster the training data using the *k*-means algorithm for *k* = 3 groups using the hierarchical cluster results above for the seed points. Provide PCA summaries of the results. Discuss the agreement between the true groups and the groups found by the *k*-means algorithm.
 
 ``` r
 trainb.sc <- traina.sc
@@ -208,7 +207,7 @@ biplot(kmeans.pca, pc.biplot = FALSE)
 
 ![](KmeansAndKNN_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-4-3.png)
 
-5 Perform a *k*-NN classification using *k* = 2 nearest neighbors for the three groups. Compute and discuss the confusion matrix based on the test data frame.
+#### 5 Perform a *k*-NN classification using *k* = 2 nearest neighbors for the three groups. Compute and discuss the confusion matrix based on the test data frame.
 
 ``` r
 # Put your R code here.
@@ -240,7 +239,7 @@ table(diabetes.knn,true.labelsa)
     ##   versicolor      0         14         1
     ##   virginica       0          1        14
 
-6 Determine the optimal *k*, i.e., the number of nearest neighbors, for the three-group problem using the confusion matrix computed on the test data frame in each case. Discuss.
+#### 6 Determine the optimal *k*, i.e., the number of nearest neighbors, for the three-group problem using the confusion matrix computed on the test data frame in each case. Discuss.
 
 ``` r
 # Put your R code here.
