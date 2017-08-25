@@ -1,0 +1,174 @@
+Assignment 2:  k-means and k-NN
+
+This is well known dataset found in the pattern recognition literature. Fisher's paper is a classic in the field and is referenced frequently to this day. The data set contains 3 classes of 50 instances each, where each class refers to the type of iris plant.
+
+Predicted attribute: class of iris plant. 
+
+Attribute Information:  
+* sepal length in cm  
+* sepal width in cm  
+* petal length in cm  
+* petal width in cm  
+* Iris species: Setosa; Versicolour; Virginica  
+
+1 Compute summary statistics and plot a scatterplot matrix for each of the three iris species. `Species` is a factor and the other variables are numberic.
+```{r}
+data(iris)
+attach(iris)
+head(iris)
+# Put your R code here.
+summary(iris[iris$Species=="setosa",]) #summary(iris[which(iris$Species=="setosa"),])
+summary(iris[iris$Species=="versicolor",])
+summary(iris[iris$Species=="virginica",])
+
+pairs(iris[1:4], main = "Iris Data(ALtogether)", pch = 21, bg = c("red", "green3", "blue")[unclass(iris$Species)],panel = function (x, y, ...) {
+    points(x, y, ...)
+    abline(lm(y ~ x), col = "grey")
+    });  par(xpd=TRUE);   legend(0,.4 , as.vector(unique(iris$Species)), fill=c("red", "green3", "blue"))
+
+
+irisSetosa <- iris[iris$Species=="setosa",]
+irisSetosa$Species <- NULL
+pairs(irisSetosa[1:4], main = "Iris Setosa", pch = 21, bg = c("red"),panel = function (x, y, ...) {
+    points(x, y, ...)
+    abline(lm(y ~ x), col = "grey")
+    })
+
+irisVersi <- iris[iris$Species=="versicolor",]
+irisVersi$Species <- NULL
+pairs(irisVersi[1:4], main = "Iris versicolor", pch = 21, bg = c("green3"),panel = function (x, y, ...) {
+    points(x, y, ...)
+    abline(lm(y ~ x), col = "grey")
+    })
+
+
+irisVirginica <- iris[iris$Species=="virginica",]
+irisVirginica $Species <- NULL
+pairs(irisVirginica [1:4], main = "Iris virginica", pch = 21, bg = c("blue"),panel = function (x, y, ...) {
+    points(x, y, ...)
+    abline(lm(y ~ x), col = "grey")
+    })
+
+
+
+```
+
+2 Create a logical variable `train` and add this to the `iris` data frame. Randomly sample 35 observations from each of the species and label these `TRUE`. Label the remaining 15 in each group (species) `FALSE`. The training and test observations should remain fixed for the remainder of the analysis. For convenience subset the sample into training and testing data frames.
+```{r}
+# Put your R code here.
+train1 <- sample(1:50, 35, replace=FALSE)
+train2 <- sample(51:100, 35, replace=FALSE)
+train3 <- sample(101:150, 35, replace=FALSE)
+
+test1 <- setdiff(1:50, train1)
+test2 <- setdiff(51:100, train2)
+test3 <- setdiff(101:150, train3)
+
+
+train11 <- iris[train1,] # or train12 <- subset(iris[train1, ])
+train11$train <- rep.int(TRUE,35)
+test11 <- iris[test1,]
+test11$train <-rep.int(FALSE,15)
+setosa <- rbind(train11,test11)
+
+train22 <- iris[train2,] # or train12 <- subset(iris[train1, ])
+train22$train <- rep.int(TRUE,35)
+test22 <- iris[test2,]
+test22$train <-rep.int(FALSE,15)
+versicolor <- rbind(train22,test22)
+
+train33 <- iris[train3,] # or train12 <- subset(iris[train1, ])
+train33$train <- rep.int(TRUE,35)
+test33 <- iris[test3,]
+test33$train <-rep.int(FALSE,15)
+virginica <- rbind(train33,test33)
+
+traina <- rbind(train11,train22,train33); head(traina)
+testa <- rbind(test11,test22,test33) ; head(testa)
+
+true.labelsa <- testa$Species
+```
+
+3 Perform an average linkage hierarchical cluster analysis on the training data frame without consideration of the species groupings and cut the tree at 3 groups. Provide relevant graphical and numerical summeries.
+```{r}
+# Put your R code here.
+traind <- traina
+traind$Species <- NULL
+traind$train <- NULL
+traina.sc <- scale(traind)
+traina.dis <- dist(traina.sc)
+h.averagea <- hclust(traina.dis, method="average")
+plot(h.averagea, ann = F , labels = traina$Species )
+rect.hclust(h.averagea, k=3)
+cutree(h.averagea, 3)
+
+
+initial.pointsa <- tapply(traina.sc, list(rep(cutree(h.averagea, 3), ncol(traina.sc)), col(traina.sc)), mean)
+dimnames(initial.pointsa) <- list(NULL, dimnames(traina.sc)[[2]])
+initial.pointsa
+
+
+```
+
+4 Cluster the training data using the $k$-means algorithm for $k=3$ groups using the hierarchical cluster results above for the seed points. Provide PCA summaries of the results. Discuss the agreement between the true groups and the groups found by the $k$-means algorithm.
+```{r}
+# Put your R code here.
+trainb.sc <- traina.sc
+initial.pointsb <- initial.pointsa
+kmeansa <- kmeans(trainb.sc,initial.pointsb)
+kmeansa$centers
+
+kmeansa$cluster  # the clusters found by k-means are NOT identical to those found by cutting the average-linkage tree into three grpups.
+
+table(kmeansa$cluster,as.numeric(traina$Species))
+# for group 2 and 3 it is not good but for group one it is perfect
+
+kmeans.pca <- princomp(trainb.sc)
+kmeans.pca.pred <- predict(kmeans.pca)
+kmeans.pca.centers <- predict(kmeans.pca, kmeansa$centers)
+plot(kmeans.pca.pred[, 1:2], type="n", xlab = "Canonical PCA 1", ylab = "Canonical PCA 2")
+text(kmeans.pca.pred[, 1:2], labels = kmeansa$cluster)
+points(kmeans.pca.centers[, 1:2], pch = 3, cex = 3)
+screeplot(kmeans.pca, type = "lines")
+biplot(kmeans.pca, pc.biplot = FALSE)
+
+```
+
+5 Perform a $k$-NN classification using $k = 2$ nearest neighbors for the three groups. Compute and discuss the confusion matrix based on the test data frame.
+```{r}
+# Put your R code here.
+library(class)
+trainb <- traina
+trainb$Species <- NULL ; trainb$train <- NULL
+testb <- testa
+testb$Species <- NULL ; testb$train<- NULL
+(diabetes.knn <- knn (trainb, testb, traina$Species, k=2)) ;
+table(diabetes.knn,true.labelsa)
+```
+
+6 Determine the optimal $k$, i.e., the number of nearest neighbors, for the three-group problem using the confusion matrix computed on the test data frame in each case. Discuss.
+```{r}
+# Put your R code here.
+ratea <- c()
+n.testa <- length(testa[,1])
+
+for (k in 1:20) {
+  predicted.labelsa <- knn(trainb, testb, traina$Species, k)
+  n.incorrect.labelsa <- sum(predicted.labelsa != true.labelsa)
+  misclassification.ratea <- n.incorrect.labelsa / n.testa
+  ratea <- c(misclassification.ratea, ratea)
+  
+}
+ratea
+
+plot(1/(20:1), ratea, type="b", xlab="Flexibility (1/k)")
+
+
+#According to the figure the optimal points easily can be chosen by looking at the figure (it is different for each run because the samples are random)
+
+
+
+
+
+```
+
