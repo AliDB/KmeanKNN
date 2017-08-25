@@ -1,4 +1,11 @@
-Assignment 2:  k-means and k-NN
+---
+output:
+  rmarkdown: github_document
+  html_document: default
+  pdf_document: default
+---
+
+# k-means and k-NN
 
 This is well known dataset found in the pattern recognition literature. Fisher's paper is a classic in the field and is referenced frequently to this day. The data set contains 3 classes of 50 instances each, where each class refers to the type of iris plant.
 
